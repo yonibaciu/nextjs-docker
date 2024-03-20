@@ -1,12 +1,26 @@
 ---
-name: Build and Push Golang Image to AWS ECR
+name: Build and Push Image to AWS ECR and then deploy to ECS
 on:
   push:
     branches: [main]
 jobs:
+  sonarcloud:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        # Disabling shallow clone is recommended for improving relevancy of reporting
+        fetch-depth: 0
+    - name: SonarCloud Scan
+      uses: sonarsource/sonarcloud-github-action@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
   build-and-push:
     name: Build and Push to ECR
     runs-on: ubuntu-latest
+    needs: [sonarcloud]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -25,7 +39,7 @@ jobs:
       - name: Automatic Tagging of Releases
         id: increment-git-tag
         run: |
-          bash ./build/git_update.sh -v major
+          bash ./docker/git_update.sh -v major
 
       - name: Build, Tag, and Push the Image to Amazon ECR
         id: build-image
