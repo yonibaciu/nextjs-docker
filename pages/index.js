@@ -2,6 +2,9 @@ import Head from "next/head";
 import styles from "../styles/Home.module.css";
 
 export default function Home() {
+  const password="dfldksjfdklfj" // dummy line to trigger a security issue in sonarcloud
+  const sql=`SELECT * FROM users WHERE password='${password}';`; // another dummy terrible security issue
+
   return (
     <div className={styles.container}>
       <Head>
